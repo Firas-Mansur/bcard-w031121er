@@ -6,9 +6,13 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
 import { useTheme } from "../../../../providers/ThemeProvider";
+import { useSearchParams } from "react-router-dom";
+
 
 const SearchBar = () => {
   const { isDark } = useTheme();
+  const [searchParams, setSearch] = useSearchParams()
+  const handleChange = ({target}) => setSearch({q: target.value})
 
   return (
     <Box display="inline-flex">
@@ -17,6 +21,8 @@ const SearchBar = () => {
           sx={{ backgroundColor: isDark ? "#333333" : "#e3f2fd" }}
           placeholder="Search"
           size="small"
+          value={searchParams.get("q") ?? ""}
+          onChange={handleChange}
           endAdornment={
             <InputAdornment position="end">
               <IconButton edge="end">
@@ -28,6 +34,6 @@ const SearchBar = () => {
       </FormControl>
     </Box>
   );
-};
+}
 
 export default SearchBar;

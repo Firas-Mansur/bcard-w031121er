@@ -1,13 +1,58 @@
-import React from "react";
-import { useUser } from "../../users/providers/UserProvider";
-import { Navigate } from "react-router-dom";
-import ROUTES from "../../routes/routesModel";
+import { Container } from '@mui/material'
+import React, { useEffect } from 'react'
+import { useCallback } from 'react'
+import PageHeader from "../../components/PageHeader";
+
+
+
+import CardsFeedback from '../components/CardsFeedback';
+import useCards from '../hooks/useCards'
+
+
+
 
 const FavCardsPage = () => {
-  const { user } = useUser();
-  if (!user) return <Navigate replace to={ROUTES.CARDS} />;
 
-  return <div>FavCardsPage</div>;
-};
+  const {value, ...rest} = useCards()
+  const {isLoading, error, filteredCards,cards} = value;
+  const {handleDeleteCard, handleGetFavCards} = rest;
+ 
 
-export default FavCardsPage;
+
+  useEffect(() => {
+    handleGetFavCards()
+   
+  },[])
+
+  const onDeleteCard = useCallback(
+    async (cardId) => {
+      await handleDeleteCard(cardId);
+      await handleGetFavCards();
+    },
+    []
+  );
+
+  const changeLikeStatus = useCallback(async () => {
+    await handleGetFavCards();    
+  }, [])
+
+  return (
+    <Container>
+      <PageHeader
+        title="Favorite Cards Page"
+        subtitle="Here you can find all your favorite business cards"
+      />
+
+      <CardsFeedback
+        isLoading={isLoading}
+        error={error}
+        cards={filteredCards}
+        onDelete={onDeleteCard}
+        onLike={changeLikeStatus}
+        
+      />
+    </Container>
+  )
+}
+
+export default FavCardsPage

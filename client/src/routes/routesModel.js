@@ -10,7 +10,9 @@ const ROUTES = {
   LOGIN: "/login",
   CARD_DETAILS: "/card-info",
   USER_PROFILE: "/user-info",
+  EDIT_CARD: "/edit-card",
   EDIT_USER: "edit-user",
+  DELETE_CARD: "/delete-cards",
 };
 
 export default ROUTES;

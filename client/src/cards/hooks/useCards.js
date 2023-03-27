@@ -1,22 +1,52 @@
-import { useCallback, useState, useMemo } from "react";
-import { createCard, getCards, getMyCards } from "./../services/cardApiService";
+import { useCallback,useEffect, useState, useMemo } from "react";
+import { changeLikeStatus, createCard, getCard,  getMyCards } from "./../services/cardApiService";
+import { getCards, editCard, deleteCard } from "./../services/cardApiService";
 import useAxios from "../../hooks/useAxios";
 import normalizeCard from "./../helpers/normalization/normalizeCard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSnack } from "../../providers/SnackbarProvider";
 import ROUTES from "../../routes/routesModel";
+import { useUser } from "../../users/providers/UserProvider";
+
+
 
 const useCards = () => {
-  const [isLoading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { user } = useUser()
+  const navigate = useNavigate();
   const [cards, setCards] = useState();
   const [card, setCard] = useState();
+  const [query, setQuery] = useState("")
+  const [isLoading, setLoading] = useState(true);
+  const [error, setError] = useState();
+  const [filteredCards, setFilter] = useState()
+  const [searchParams] = useSearchParams()
+
+  
+  useEffect(()=>{
+    setQuery(searchParams.get("q") ?? "")
+  },[searchParams]);
+
+
+
+  useEffect(()=> {
+    if (cards) {
+      setFilter(cards.filter(
+          cards => 
+          cards.title.includes(query) || String(cards.bizNumber).includes(query)
+          
+        )
+      )
+    }
+  },[cards, query])
+  
+  
+
 
   useAxios();
-  const navigate = useNavigate();
   const snack = useSnack();
+  
 
-  const requestStatus = (loading, errorMessage, cards, card = null) => {
+  const requestStatus = (loading, errorMessage, cards, card) => {
     setLoading(loading);
     setError(errorMessage);
     setCards(cards);
@@ -32,6 +62,8 @@ const useCards = () => {
       requestStatus(false, error, null);
     }
   };
+
+
 
   const handleGetMyCards = useCallback(async () => {
     try {
@@ -56,16 +88,88 @@ const useCards = () => {
     }
   }, []);
 
+  const handleGetCard = useCallback(async cardId => {
+    try {
+      setLoading(true);
+      const card = await getCard(cardId);
+      requestStatus(false, null,null, card)
+      return card;
+    } catch (error) {
+      requestStatus(false, error, null)
+      
+    }
+
+  },[]);
+
+
+  const handleUpdateCard = useCallback ( async (cardId, cardFromClient) => {
+    try {
+      setLoading(true);
+      await editCard( cardId, cardFromClient);
+      requestStatus(false, null, null);
+      snack("success", "The business card has been successfully update");
+      navigate(ROUTES.MY_CARDS);
+    } catch (error) {
+      requestStatus(false, error, null);
+    }
+  },
+  [snack]
+  )
+
+  const handleLikeCard = useCallback(async cardId =>{
+    try {
+      await changeLikeStatus(cardId);
+      await getCards()
+      requestStatus(false, null, cards, card);
+    } catch (error) {
+      requestStatus(false, error, null)
+    }
+  },[snack]);
+
+  const handleGetFavCards = useCallback(async () => {
+    try {
+      setLoading(true)
+     const cards = await getCards();
+     const favCard = cards.filter(
+        card => !!card.likes.find(id => id === user._id)
+      );
+     requestStatus(false, null, favCard)
+    } catch (error) {
+      requestStatus(false, error, null)
+    }
+  },[user])
+
+  
+
+  const handleDeleteCard = async (cardId) => {
+    try {
+      setLoading(true);
+      await deleteCard(cardId);
+      requestStatus(false, null, cards);
+    } catch (error) {
+      requestStatus(false, error, null);
+    }
+  
+  };
+
   const value = useMemo(() => {
-    return { isLoading, cards, card, error };
-  }, [isLoading, cards, card, error]);
+    return { cards, card, isLoading, error, filteredCards };
+  }, [cards, card, isLoading, error, filteredCards]);
+
 
   return {
     value,
+    handleGetCard,
+    handleDeleteCard,
     handleGetCards,
+    handleCreateCard, 
     handleGetMyCards,
-    handleCreateCard,
+    handleUpdateCard,
+    handleLikeCard,
+    setCards,
+    handleGetFavCards,
   };
 };
+
 
 export default useCards;

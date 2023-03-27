@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import ButtonComp from "./ButtonComp";
 
 const UseCallback = () => {
@@ -7,12 +7,6 @@ const UseCallback = () => {
 
   const incrementAge = () => setAge(prev => prev + 1);
   const incrementHeight = () => setHeight(prev => prev + 1);
-
-  // const incrementAge = useCallback(() => setAge((prev) => prev + 1), [age]);
-  // const incrementHeight = useCallback(
-  //   () => setHeight((prev) => prev + 1),
-  //   [height]
-  // );
 
   return (
     <>

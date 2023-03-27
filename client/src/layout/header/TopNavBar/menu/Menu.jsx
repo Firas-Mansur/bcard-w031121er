@@ -62,7 +62,7 @@ const Menu = ({ isOpen, anchorEl, onClose }) => {
             />
             <MenuLink
               label="edit account"
-              navigateTo={ROUTES.EDIT_USER}
+              navigateTo={ROUTES.CARDS}
               onClick={onClose}
             />
 

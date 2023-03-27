@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { func } from "prop-types";
 import MuiCard from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
@@ -8,11 +8,11 @@ import CardActionBar from "./CardActionBar";
 import cardType from "./../../models/types/cardType";
 import { useNavigate } from "react-router-dom";
 import ROUTES from "../../../routes/routesModel";
-import { useUser } from "../../../users/providers/UserProvider";
+
 
 const Card = ({ card, onDelete, onLike }) => {
   const navigate = useNavigate();
-  const { user } = useUser();
+  // console.log(card);
 
   return (
     <MuiCard sx={{ minWidth: 280 }}>
@@ -21,15 +21,12 @@ const Card = ({ card, onDelete, onLike }) => {
         <CardHead image={card.image} />
         <CardBody card={card} />
       </CardActionArea>
-
-      {user && (
         <CardActionBar
-          cardId={card._id}
-          onDelete={onDelete}
-          onLike={onLike}
-          userId={card.user_id}
-        />
-      )}
+         onDelete={onDelete}
+         cardId={card._id} 
+         cardUserId={card.user_id} 
+         cardLikes={card.likes}
+         onLike={onLike} />
     </MuiCard>
   );
 };
@@ -37,7 +34,6 @@ const Card = ({ card, onDelete, onLike }) => {
 Card.propTypes = {
   card: cardType.isRequired,
   onDelete: func.isRequired,
-  onLike: func.isRequired,
 };
 
-export default Card;
+export default React.memo(Card);

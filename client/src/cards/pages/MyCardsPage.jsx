@@ -9,24 +9,31 @@ import AddIcon from "@mui/icons-material/Add";
 import CardsFeedback from "../components/CardsFeedback";
 import useCards from "../hooks/useCards";
 
+
 const MyCardsPage = () => {
+  const { value, handleGetMyCards, handleDeleteCard } = useCards([]);
+  const { isLoading, error, cards} = value;
   const { user } = useUser();
-  const { value, handleGetMyCards } = useCards();
-  const { isLoading, error, cards } = value;
   const navigate = useNavigate();
 
   useEffect(() => {
-    handleGetMyCards();
-  }, []);
+    if (!user) navigate(ROUTES.CARDS);
+   else handleGetMyCards();
+  }, [user]);
+
+  const onDeleteCard = async cardId => {
+    await handleDeleteCard(cardId);
+    await handleGetMyCards()
+  }
 
   if (!user || !user.isBusiness) return <Navigate replace to={ROUTES.CARDS} />;
 
   return (
     <Container sx={{ position: "relative", minHeight: "92vh" }}>
       <PageHeader
-        title="My Cards Page"
-        subtitle="Here you can find your business cards"
-      />
+        title="Cards"
+        subtitle="Here you can find your business cards from all categories"
+      />{" "}
 
       {cards && (
         <Fab
@@ -45,10 +52,12 @@ const MyCardsPage = () => {
         isLoading={isLoading}
         error={error}
         cards={cards}
-        onDelete={() => {}}
+        onDelete={onDeleteCard}
       />
     </Container>
   );
 };
+
+
 
 export default MyCardsPage;
